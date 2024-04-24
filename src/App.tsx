@@ -47,20 +47,25 @@ function App() {
         {/* Button to trigger AddNote form */}
 
         {showAddNoteForm && (
-          // Use React Portal to render AddNote as a modal
           <div className="modal">
-            <AddNote />
+            <AddNote setNotes={setNotes} />
           </div>
         )}
 
         {/* Rest of your note display logic */}
-        <div className=" p-8 md:p-32 sm:gap-4 text-wrap overflow-hidden md:gap-8  text-center grid  sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
-          {notes.map((note) => (
-            <div key={note._id} className="text-3xl max-w-lg m-auto ">
-              <Note note={note} />
-            </div>
-          ))}
-        </div>
+        {notes.length > 0 ? (
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-8 md:p-32 sm:gap-4 text-wrap overflow-hidden md:gap-8 text-center">
+            {notes.map((note) => (
+              <div key={note._id} className="text-3xl max-w-lg m-auto">
+                <Note note={note} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <h1 className="text-center flex justify-center items-center min-h-screen">
+            No notes found.
+          </h1>
+        )}
       </div>
     </>
   );

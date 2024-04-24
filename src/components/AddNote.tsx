@@ -15,7 +15,7 @@ import { Textarea } from "./ui/textarea";
 import { Note } from "@/App";
 import { fetchNotes, postNote } from "@/utils/NotesApi";
 
-const AddNote = () => {
+const AddNote = ({ setNotes }) => {
   // Pass onClose prop from App.tsx
   const titleRef = useRef<HTMLInputElement>(null); // Ref for input field
   const textAreaRef = useRef<HTMLTextAreaElement>(null); // Ref for textarea
@@ -28,7 +28,6 @@ const AddNote = () => {
       title: titleRef.current?.value || "",
       text: textAreaRef.current?.value || "",
     };
-    console.log(note.text);
     if (!note.text.trim() || !note.title.trim()) {
       return; // Do nothing if content is empty
     }
@@ -36,10 +35,12 @@ const AddNote = () => {
     const newNote = await postNote(note); // Call createNote with state setter and ref
     if (newNote) {
       alert("Note created successfully");
+      setInputValue("");
+      setTextValue("");
       onClickDialog(); // Call onClose prop to close the modal
       // Fetch notes again after successful save
       const fetchedNotes = await fetchNotes();
-      // setNotes(fetchedNotes); // Assuming you have access to setNotes in AddNote.tsx (likely passed as a prop from App.tsx)
+      setNotes(fetchedNotes); // Assuming you have access to setNotes in AddNote.tsx (likely passed as a prop from App.tsx)
     }
   };
 
@@ -106,3 +107,5 @@ const AddNote = () => {
 };
 
 export default AddNote;
+
+// cc
