@@ -16,15 +16,19 @@ export interface Note {
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [showAddNoteForm, setShowAddNoteForm] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const getNotes = async () => {
       try {
+        setIsLoading(true); // Set loading state to true before fetching
         const fetchedNotes = await fetchNotes();
         setNotes(fetchedNotes);
       } catch (error) {
         console.error("Error fetching notes:", error);
         // Handle the error here, e.g., display an error message to the user
+      } finally {
+        setIsLoading(false); // Set loading state to false after fetching (success or error)
       }
     };
 
@@ -39,6 +43,8 @@ function App() {
     setShowAddNoteForm(false);
   };
 
+  const loadingStatement = <h1>Loading...</h1>;
+
   return (
     <>
       <div className="text-center ">
@@ -48,23 +54,31 @@ function App() {
 
         {showAddNoteForm && (
           <div className="modal">
-            <AddNote setNotes={setNotes} />
+            <AddNote setNotes={setNotes} isLoading={isLoading} />
           </div>
         )}
 
         {/* Rest of your note display logic */}
         {notes.length > 0 ? (
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-8 md:p-32 sm:gap-4 text-wrap overflow-hidden md:gap-8 text-center">
-            {notes.map((note) => (
-              <div key={note._id} className="text-3xl max-w-lg m-auto">
-                <Note note={note} />
-              </div>
-            ))}
-          </div>
+          // Conditionally render loading or note list based on isLoading state
+          isLoading ? (
+            loadingStatement
+          ) : (
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-8 md:p-32 sm:gap-4 text-wrap overflow-hidden md:gap-8 text-center">
+              {notes.map((note) => (
+                <div key={note._id} className="text-3xl max-w-lg m-auto">
+                  <Note note={note} />
+                </div>
+              ))}
+            </div>
+          )
         ) : (
-          <h1 className="text-center flex justify-center items-center min-h-screen">
-            No notes found.
-          </h1>
+          // Only display "No notes found" when notes are empty and not loading
+          !isLoading && (
+            <h1 className="text-center flex justify-center items-center min-h-screen">
+              No notes found.
+            </h1>
+          )
         )}
       </div>
     </>

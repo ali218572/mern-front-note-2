@@ -15,20 +15,32 @@ import { Textarea } from "./ui/textarea";
 import { Note } from "@/App";
 import { fetchNotes, postNote } from "@/utils/NotesApi";
 
-const AddNote = ({ setNotes }) => {
+const AddNote = ({ setNotes, isLoading }) => {
   // Pass onClose prop from App.tsx
   const titleRef = useRef<HTMLInputElement>(null); // Ref for input field
   const textAreaRef = useRef<HTMLTextAreaElement>(null); // Ref for textarea
   const [inputValue, setInputValue] = useState(""); // State for input value
-  const [open, setOpen] = useState(false);
   const [textValue, setTextValue] = useState("");
-
+  const [open, setOpen] = useState(false);
+  const [isTitleEmpty, setIsTitleEmpty] = useState(false); // State for title validation
+  const [isEmptyText, setIsEmptyText] = useState(false); // State for text area validation
   const onClickSave = async () => {
+    setIsTitleEmpty(false); // Reset validation state before checking
+    setIsEmptyText(false);
     const note = {
       title: titleRef.current?.value || "",
       text: textAreaRef.current?.value || "",
     };
-    if (!note.text.trim() || !note.title.trim()) {
+    if (!note.text.trim() && !note.title.trim()) {
+      setIsEmptyText(!note.text.trim()); // Set validation state for text area
+      setIsTitleEmpty(true);
+    }
+    if (!note.text.trim()) {
+      setIsEmptyText(!note.text.trim()); // Set validation state for text area
+      return; // Do nothing if content is empty
+    }
+    if (!note.title.trim()) {
+      setIsTitleEmpty(true);
       return; // Do nothing if content is empty
     }
 
@@ -73,10 +85,18 @@ const AddNote = ({ setNotes }) => {
             <Input
               id="name"
               value={inputValue} // Set input value from state
-              className="col-span-3"
+              className={`col-span-3 w-72 ${
+                isTitleEmpty ? "text-red-500" : ""
+              }`}
               ref={titleRef} // Assign ref to input
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setIsTitleEmpty(!e.target.value.trim()); // Reset validation based on trimmed value
+              }}
+              required
             />
+            <br />
+            {isTitleEmpty && <p className="text-red-500 ml-2"> (Required)</p>}
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="username" className="text-right">
@@ -85,11 +105,18 @@ const AddNote = ({ setNotes }) => {
             <Textarea
               placeholder="Type your text here."
               id="username"
-              className="w-72 text-left "
+              className={`col-span-3 w-72 ${isEmptyText ? "text-red-500" : ""}`}
               ref={textAreaRef} // Assign ref to textarea
-              onChange={(e) => setTextValue(e.target.value)}
+              onChange={(e) => {
+                setTextValue(e.target.value);
+                setIsEmptyText(!e.target.value.trim()); // Reset validation on input change
+              }}
               value={textValue}
+              rows={4}
             />
+            <br />
+
+            {isEmptyText && <p className="text-red-500 ml-2"> (Required)</p>}
           </div>
         </div>
         <DialogFooter className="items-end">
@@ -97,6 +124,7 @@ const AddNote = ({ setNotes }) => {
             type="submit"
             className="bg-gray-500 hover:bg-gray-700 text-slate-50 rounded-xl mt-4 w-28  "
             onClick={onClickSave}
+            disabled={isLoading}
           >
             Save changes
           </Button>
@@ -107,5 +135,3 @@ const AddNote = ({ setNotes }) => {
 };
 
 export default AddNote;
-
-// cc
